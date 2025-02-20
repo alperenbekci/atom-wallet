@@ -13,11 +13,14 @@ contract SmartAccountRegistry is Ownable {
     mapping(address => string) private addresses;
     // Name reservation expiry timestamps
     mapping(string => uint256) private nameExpiry;
+    // Authorized factories
+    mapping(address => bool) public authorizedFactories;
 
     // Events
     event NameRegistered(string indexed name, address indexed account, uint256 expiryTime);
     event NameReleased(string indexed name, address indexed account);
     event NameRenewed(string indexed name, address indexed account, uint256 newExpiryTime);
+    event FactoryAuthorized(address indexed factory, bool authorized);
 
     // Constants
     uint256 public constant REGISTRATION_PERIOD = 365 days;
@@ -26,6 +29,28 @@ contract SmartAccountRegistry is Ownable {
     string public constant NAME_SUFFIX = ".units";
 
     constructor() Ownable(msg.sender) {}
+
+    /**
+     * @dev Sets the authorization status of a factory
+     * @param factory The factory address to authorize/deauthorize
+     * @param authorized True to authorize, false to deauthorize
+     */
+    function setFactoryAuthorization(address factory, bool authorized) external onlyOwner {
+        require(factory != address(0), "Invalid factory address");
+        authorizedFactories[factory] = authorized;
+        emit FactoryAuthorized(factory, authorized);
+    }
+
+    /**
+     * @dev Modifier to check if sender is authorized
+     */
+    modifier onlyAuthorized() {
+        require(
+            authorizedFactories[msg.sender] || msg.sender == owner(),
+            "Not authorized"
+        );
+        _;
+    }
 
     /**
      * @dev Validates a name format
@@ -77,7 +102,7 @@ contract SmartAccountRegistry is Ownable {
      * @param name The name to register (must end with .units)
      * @param account The Smart Account address
      */
-    function registerName(string calldata name, address account) external {
+    function registerName(string calldata name, address account) external onlyAuthorized {
         require(_isValidName(name), "Invalid name format");
         require(account != address(0), "Invalid account address");
         require(names[name] == address(0) || nameExpiry[name] < block.timestamp, "Name already taken");
