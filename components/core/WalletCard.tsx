@@ -1,53 +1,103 @@
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import * as Clipboard from 'expo-clipboard';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  ImageBackground,
+} from "react-native";
+import * as Clipboard from "expo-clipboard";
+import { useWallet } from "@/lib/hooks/useWallet";
+import { useState, useEffect } from "react";
+import { updateBalances } from "@/lib/services/wallet";
 
-export interface WalletCardProps {
-  label: string;
-  address: string;
-  balance: string;
-  showCopy?: boolean;
+interface WalletCardProps {
+  type: "eoa" | "smart";
 }
 
-export const WalletCard = ({ label, address, balance, showCopy = true }: WalletCardProps) => {
-  const handleCopy = async () => {
-    await Clipboard.setStringAsync(address);
+export const WalletCard = ({ type }: WalletCardProps) => {
+  const { signer, address, smartAccountAddress } = useWallet();
+  const [eoaBalance, setEoaBalance] = useState("0");
+  const [aaBalance, setAaBalance] = useState("0");
+
+  const refreshBalances = async () => {
+    if (signer && smartAccountAddress) {
+      try {
+        const { eoaBalance: eoa, aaBalance: aa } = await updateBalances(
+          signer,
+          smartAccountAddress
+        );
+        setEoaBalance(eoa);
+        setAaBalance(aa);
+      } catch (error) {
+        console.error("Error updating balances:", error);
+      }
+    }
   };
 
+  useEffect(() => {
+    if (signer && smartAccountAddress) {
+      refreshBalances();
+      const interval = setInterval(refreshBalances, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [signer, smartAccountAddress]);
+
+  const handleCopy = async (addressToCopy: string) => {
+    await Clipboard.setStringAsync(addressToCopy);
+  };
+
+  const cardData =
+    type === "eoa"
+      ? { title: "EOA Wallet", balance: eoaBalance, address: address }
+      : {
+          title: "Smart Account",
+          balance: aaBalance,
+          address: smartAccountAddress,
+        };
+
   return (
-    <View style={styles.container}>
-      <View style={styles.innerContainer}>
-        <View style={styles.contentContainer}>
-          <View style={styles.headerContainer}>
-            <Text style={styles.label}>{label}</Text>
-            <View style={styles.statusContainer}>
-              <View style={styles.statusDot} />
-              <Text style={styles.statusText}>Connected</Text>
-            </View>
-          </View>
-
-          <View style={styles.balanceContainer}>
-            <Text style={styles.balanceText}>
-              {parseFloat(balance).toFixed(4)}
-            </Text>
-            <Text style={styles.ethText}>ETH</Text>
-          </View>
-
-          <View style={styles.addressContainer}>
-            <Text style={styles.addressText} numberOfLines={1} ellipsizeMode="middle">
-              {address}
-            </Text>
-            {showCopy && (
-              <TouchableOpacity
-                onPress={handleCopy}
-                style={styles.copyButton}
-              >
-                <CopyIcon />
-              </TouchableOpacity>
-            )}
+    <ImageBackground
+      source={
+        type === "eoa"
+          ? require("@/assets/images/eoa.png")
+          : require("@/assets/images/smart-account.png")
+      }
+      style={styles.container}
+      imageStyle={styles.backgroundImage}
+    >
+      <View style={styles.contentContainer}>
+        <View style={styles.headerContainer}>
+          <Text style={styles.label}>{cardData.title}</Text>
+          <View style={styles.statusContainer}>
+            <View style={styles.statusDot} />
+            <Text style={styles.statusText}>Connected</Text>
           </View>
         </View>
+
+        <View style={styles.balanceContainer}>
+          <Text style={styles.balanceText}>
+            {parseFloat(cardData.balance).toFixed(4)}
+          </Text>
+          <Text style={styles.unitText}>UNIT0</Text>
+        </View>
+
+        <View style={styles.addressContainer}>
+          <Text
+            style={styles.addressText}
+            numberOfLines={1}
+            ellipsizeMode="middle"
+          >
+            {cardData.address}
+          </Text>
+          <TouchableOpacity
+            onPress={() => handleCopy(cardData.address)}
+            style={styles.copyButton}
+          >
+            <CopyIcon />
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
+    </ImageBackground>
   );
 };
 
@@ -61,85 +111,96 @@ const CopyIcon = () => (
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#2563EB', // blue-600
-    borderRadius: 16,
-    padding: 4,
-    overflow: 'hidden',
+    width: "100%",
+    height: 200,
+    marginBottom: 16,
+    overflow: "hidden",
   },
-  innerContainer: {
-    backgroundColor: '#111827', // gray-900
-    borderRadius: 12,
-    padding: 24,
-    height: '100%',
+  backgroundImage: {
+    borderRadius: 16,
   },
   contentContainer: {
-    gap: 16,
+    flex: 1,
+    padding: 20,
+    justifyContent: "space-between",
   },
   headerContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   label: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#D1D5DB', // gray-300
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#FFFFFF",
   },
   statusContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
   },
   statusDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#34D399', // green-400
-    opacity: 0.8,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: "#4CAF50",
   },
   statusText: {
-    fontSize: 14,
-    color: '#D1D5DB', // gray-300
+    fontSize: 12,
+    color: "#FFFFFF",
+    opacity: 0.7,
   },
   balanceContainer: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    gap: 8,
+    flexDirection: "row",
+    alignItems: "baseline",
+    gap: 4,
   },
   balanceText: {
-    fontSize: 30,
-    fontWeight: 'bold',
-    color: '#F3F4F6', // gray-100
+    fontSize: 32,
+    fontWeight: "bold",
+    color: "#FFFFFF",
   },
-  ethText: {
-    color: '#D1D5DB', // gray-300
+  unitText: {
+    fontSize: 16,
+    color: "#FFFFFF",
+    opacity: 0.7,
   },
   addressContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    borderRadius: 12,
+    padding: 12,
   },
   addressText: {
-    flex: 1,
     fontSize: 14,
-    color: '#D1D5DB', // gray-300
-    fontFamily: 'monospace',
+    color: "#FFFFFF",
+    opacity: 0.7,
+    flex: 1,
+    marginRight: 8,
   },
   copyButton: {
-    padding: 8,
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
     borderRadius: 8,
+    padding: 8,
   },
   iconContainer: {
     width: 16,
     height: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   copyIconBox: {
-    width: 14,
-    height: 14,
-    borderWidth: 2,
-    borderColor: '#D1D5DB',
+    width: 12,
+    height: 12,
+    borderWidth: 1.5,
+    borderColor: "#FFFFFF",
     borderRadius: 2,
+    opacity: 0.8,
   },
 });

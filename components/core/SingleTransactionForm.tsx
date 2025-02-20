@@ -1,14 +1,26 @@
-import { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
+import { useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ActivityIndicator,
+  StyleSheet,
+} from "react-native";
+import { usePaymasterStore } from "@/lib/store";
 
 interface SingleTransactionFormProps {
   onSubmit: (recipient: string, amount: string) => void;
   loading: boolean;
 }
 
-export const SingleTransactionForm = ({ onSubmit, loading }: SingleTransactionFormProps) => {
-  const [recipient, setRecipient] = useState('');
-  const [amount, setAmount] = useState('');
+export const SingleTransactionForm = ({
+  onSubmit,
+  loading,
+}: SingleTransactionFormProps) => {
+  const [recipient, setRecipient] = useState("");
+  const [amount, setAmount] = useState("");
+  const { usePaymaster, togglePaymaster } = usePaymasterStore();
 
   const handleSubmit = () => {
     onSubmit(recipient, amount);
@@ -18,43 +30,59 @@ export const SingleTransactionForm = ({ onSubmit, loading }: SingleTransactionFo
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Send Single Transaction</Text>
-      
+      <View style={styles.header}>
+        <Text style={styles.title}>Send</Text>
+        <View style={styles.paymasterSwitch}>
+          <Text style={styles.paymasterText}>enable paymaster</Text>
+          <TouchableOpacity
+            style={[styles.switch, usePaymaster && styles.switchActive]}
+            onPress={togglePaymaster}
+          >
+            <View
+              style={[
+                styles.switchKnob,
+                usePaymaster && styles.switchKnobActive,
+              ]}
+            />
+          </TouchableOpacity>
+        </View>
+      </View>
+
       <View style={styles.formContainer}>
         <View style={styles.inputGroup}>
+          <Text style={styles.label}>To Address</Text>
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>To Address</Text>
             <TextInput
               value={recipient}
               onChangeText={setRecipient}
               style={styles.input}
               placeholder="0x..."
-              placeholderTextColor="#6B7280"
+              placeholderTextColor="rgba(255, 255, 255, 0.3)"
               autoCapitalize="none"
               autoCorrect={false}
             />
           </View>
+        </View>
 
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Amount</Text>
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Amount</Text>
-            <View style={styles.amountInputContainer}>
-              <TextInput
-                value={amount}
-                onChangeText={setAmount}
-                style={styles.input}
-                placeholder="0.0"
-                placeholderTextColor="#6B7280"
-                keyboardType="decimal-pad"
-              />
-              <Text style={styles.ethLabel}>ETH</Text>
-            </View>
+            <TextInput
+              value={amount}
+              onChangeText={setAmount}
+              style={styles.input}
+              placeholder="0.0"
+              placeholderTextColor="rgba(255, 255, 255, 0.3)"
+              keyboardType="decimal-pad"
+            />
+            <Text style={styles.unitText}>UNIT0</Text>
           </View>
         </View>
 
         <TouchableOpacity
           style={[
             styles.button,
-            (!isFormValid || loading) && styles.buttonDisabled
+            (!isFormValid || loading) && styles.buttonDisabled,
           ]}
           onPress={handleSubmit}
           disabled={!isFormValid || loading}
@@ -65,7 +93,7 @@ export const SingleTransactionForm = ({ onSubmit, loading }: SingleTransactionFo
               <Text style={styles.buttonText}>Processing...</Text>
             </View>
           ) : (
-            <Text style={styles.buttonText}>Send Transaction</Text>
+            <Text style={styles.buttonText}>Send</Text>
           )}
         </TouchableOpacity>
       </View>
@@ -75,84 +103,104 @@ export const SingleTransactionForm = ({ onSubmit, loading }: SingleTransactionFo
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#111827',
+    backgroundColor: "#262626",
     borderRadius: 16,
-    padding: 24,
-    width: '100%',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.1)",
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#F3F4F6',
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 24,
   },
+  title: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#FFFFFF",
+  },
+  paymasterSwitch: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  paymasterText: {
+    fontSize: 12,
+    color: "#FFFFFF",
+    opacity: 0.7,
+  },
+  switch: {
+    width: 36,
+    height: 20,
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    borderRadius: 10,
+    padding: 2,
+  },
+  switchActive: {
+    backgroundColor: "#2196F3",
+  },
+  switchKnob: {
+    width: 16,
+    height: 16,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 8,
+    transform: [{ translateX: 0 }],
+  },
+  switchKnobActive: {
+    transform: [{ translateX: 16 }],
+  },
   formContainer: {
-    gap: 24,
+    gap: 20,
   },
   inputGroup: {
-    gap: 16,
-  },
-  inputContainer: {
-    marginBottom: 16,
+    gap: 8,
   },
   label: {
     fontSize: 14,
-    fontWeight: '500',
-    color: '#D1D5DB',
-    marginBottom: 4,
+    color: "#FFFFFF",
+    opacity: 0.7,
+  },
+  inputContainer: {
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    borderRadius: 12,
+    height: 48,
+    paddingHorizontal: 16,
+    flexDirection: "row",
+    alignItems: "center",
   },
   input: {
-    backgroundColor: '#1F2937',
-    borderWidth: 1,
-    borderColor: '#374151',
-    borderRadius: 8,
-    padding: 12,
-    color: '#F3F4F6',
+    flex: 1,
+    color: "#FFFFFF",
+    fontSize: 16,
+    height: "100%",
+  },
+  unitText: {
+    color: "#FFFFFF",
+    opacity: 0.5,
     fontSize: 14,
-    fontFamily: 'monospace',
-  },
-  amountInputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#1F2937',
-    borderWidth: 1,
-    borderColor: '#374151',
-    borderRadius: 8,
-    position: 'relative',
-  },
-  ethLabel: {
-    position: 'absolute',
-    right: 12,
-    color: '#D1D5DB',
+    fontWeight: "500",
   },
   button: {
-    backgroundColor: '#2563EB',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+    backgroundColor: "#2196F3",
+    height: 48,
     borderRadius: 12,
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 8,
   },
   buttonDisabled: {
-    backgroundColor: '#374151',
-    opacity: 0.5,
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
   },
   buttonText: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: '500',
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "600",
   },
   loadingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
   },
   spinner: {
     marginRight: 8,
