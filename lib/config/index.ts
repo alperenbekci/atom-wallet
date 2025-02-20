@@ -1,6 +1,7 @@
 export const ENTRYPOINT_ADDRESS = process.env.NEXT_PUBLIC_ENTRYPOINT_ADDRESS ;
 export const ACCOUNT_FACTORY_ADDRESS = process.env.NEXT_PUBLIC_ACCOUNT_FACTORY_ADDRESS ;
 export const PAYMASTER_ADDRESS = process.env.NEXT_PUBLIC_PAYMASTER_ADDRESS ;
-
+export const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL ;
 export const BUNDLER_URL = process.env.NEXT_PUBLIC_BUNDLER_URL ;
 export const ACCOUNT_SALT = 0; 
+
