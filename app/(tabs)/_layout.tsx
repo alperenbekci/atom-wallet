@@ -9,18 +9,16 @@ export default function TabLayout() {
         tabBarInactiveTintColor: "rgba(255, 255, 255, 0.5)",
         tabBarStyle: {
           backgroundColor: "#262626",
-          borderTopWidth: 1,
+          borderTopWidth: 8,
           borderTopColor: "#262626",
-          height: 60,
-          paddingBottom: 8,
+          height: 80,
         },
-        headerStyle: {
-          backgroundColor: "#161616",
+        tabBarLabelPosition: "below-icon",
+        tabBarIconStyle: {
+          marginBottom: 4,
         },
-        headerTintColor: "#FFFFFF",
-        headerTitleStyle: {
-          fontSize: 20,
-          fontWeight: "600",
+        tabBarLabelStyle: {
+          marginTop: 8,
         },
       }}
     >
@@ -29,16 +27,7 @@ export default function TabLayout() {
         options={{
           title: "Home",
           tabBarIcon: ({ color }) => (
-            <Ionicons name="home-outline" size={24} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="fund"
-        options={{
-          title: "Fund",
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="wallet-outline" size={24} color={color} />
+            <Ionicons name="home" size={28} color={color} />
           ),
         }}
       />
@@ -47,16 +36,7 @@ export default function TabLayout() {
         options={{
           title: "Send",
           tabBarIcon: ({ color }) => (
-            <Ionicons name="arrow-forward-outline" size={24} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="batch"
-        options={{
-          title: "Custom",
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="apps-outline" size={24} color={color} />
+            <Ionicons name="send" size={28} color={color} />
           ),
         }}
       />
@@ -65,7 +45,7 @@ export default function TabLayout() {
         options={{
           title: "History",
           tabBarIcon: ({ color }) => (
-            <Ionicons name="time-outline" size={24} color={color} />
+            <Ionicons name="time" size={28} color={color} />
           ),
         }}
       />

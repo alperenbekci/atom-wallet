@@ -4,6 +4,7 @@ import { DualTransactionForm } from "@/components/core/DualTransactionForm";
 import { useWallet } from "@/lib/hooks/useWallet";
 import { WalletCard } from "@/components/core/WalletCard";
 import { sendBatchTransactions } from "@/lib/services/wallet";
+import { Stack } from "expo-router";
 
 export default function BatchTransactionPage() {
   const { signer, smartAccountAddress } = useWallet();
@@ -36,6 +37,19 @@ export default function BatchTransactionPage() {
 
   return (
     <View style={styles.container}>
+      <Stack.Screen
+        options={{
+          title: "Batch Transaction",
+          headerStyle: {
+            backgroundColor: "#161616",
+          },
+          headerTintColor: "#FFFFFF",
+          headerTitleStyle: {
+            fontSize: 20,
+            fontWeight: "600",
+          },
+        }}
+      />
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
