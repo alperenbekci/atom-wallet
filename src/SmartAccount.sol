@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import "account-abstraction/core/BaseAccount.sol";
 import "account-abstraction/interfaces/IEntryPoint.sol";
 import "account-abstraction/interfaces/PackedUserOperation.sol";
+import "./SmartAccountRegistry.sol";
 
 contract SmartAccount is BaseAccount {
     using ECDSA for bytes32;
@@ -13,18 +14,64 @@ contract SmartAccount is BaseAccount {
 
     address public owner;
     IEntryPoint private immutable _entryPoint;
+    SmartAccountRegistry public immutable nameRegistry;
     uint256 private constant SIG_VALIDATION_FAILED = 1;
 
     event OwnerUpdated(address indexed previousOwner, address indexed newOwner);
+    event NameRegistered(string indexed name);
+    event NameReleased(string indexed name);
+    event NameRenewed(string indexed name);
+
+    error InvalidUsername(string username);
 
     modifier onlyOwner() {
         require(msg.sender == owner, "only owner");
         _;
     }
 
-    constructor(IEntryPoint anEntryPoint, address anOwner) {
+    constructor(
+        IEntryPoint anEntryPoint,
+        address anOwner,
+        SmartAccountRegistry registry
+    ) {
         _entryPoint = anEntryPoint;
         owner = anOwner;
+        nameRegistry = registry;
+    }
+
+    /**
+     * @dev Helper function to resolve a username to an account address
+     * @param registry The SmartAccountRegistry contract
+     * @param username The username to resolve (with or without .units suffix)
+     * @return The account address
+     */
+    function resolveUsername(SmartAccountRegistry registry, string memory username) public view returns (address) {
+        // Add .units suffix if not present
+        if (bytes(username).length <= 6 || !_hasSuffix(username, ".units")) {
+            username = string.concat(username, ".units");
+        }
+        
+        address account = registry.resolveName(username);
+        if (account == address(0)) revert InvalidUsername(username);
+        return account;
+    }
+
+    /**
+     * @dev Internal function to check if a string ends with a suffix
+     */
+    function _hasSuffix(string memory str, string memory suffix) internal pure returns (bool) {
+        bytes memory strBytes = bytes(str);
+        bytes memory suffixBytes = bytes(suffix);
+        
+        if (strBytes.length < suffixBytes.length) return false;
+        
+        for (uint i = 0; i < suffixBytes.length; i++) {
+            if (strBytes[strBytes.length - suffixBytes.length + i] != suffixBytes[i]) {
+                return false;
+            }
+        }
+        
+        return true;
     }
 
     function entryPoint() public view virtual override returns (IEntryPoint) {
@@ -69,6 +116,26 @@ contract SmartAccount is BaseAccount {
         address oldOwner = owner;
         owner = newOwner;
         emit OwnerUpdated(oldOwner, newOwner);
+    }
+
+    // Name service functions
+    function registerName(string calldata name) external onlyOwner {
+        nameRegistry.registerName(name, address(this));
+        emit NameRegistered(name);
+    }
+
+    function releaseName(string calldata name) external onlyOwner {
+        nameRegistry.releaseName(name);
+        emit NameReleased(name);
+    }
+
+    function renewName(string calldata name) external onlyOwner {
+        nameRegistry.renewName(name);
+        emit NameRenewed(name);
+    }
+
+    function getName() external view returns (string memory) {
+        return nameRegistry.resolveAddress(address(this));
     }
 
     receive() external payable {}
