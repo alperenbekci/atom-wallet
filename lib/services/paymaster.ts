@@ -3,6 +3,10 @@ import { PAYMASTER_ADDRESS, ENTRYPOINT_ADDRESS } from '../config/index';
 import { MinimalPaymasterABI, EntryPointABI } from '../abi';
 import { UserOperation } from '../types/index';
 
+if (!PAYMASTER_ADDRESS || !ENTRYPOINT_ADDRESS) {
+    throw new Error('Required contract addresses are not defined');
+}
+
 export const getPaymaster = (signer: ethers.Signer) => {
     return new ethers.Contract(
         PAYMASTER_ADDRESS,

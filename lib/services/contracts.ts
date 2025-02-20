@@ -3,6 +3,10 @@ import { ethers } from 'ethers';
 import { ENTRYPOINT_ADDRESS, ACCOUNT_FACTORY_ADDRESS } from '../config/index';
 import { EntryPointABI, SmartAccountABI, AccountFactoryABI } from '../abi';
 
+if (!ENTRYPOINT_ADDRESS || !ACCOUNT_FACTORY_ADDRESS) {
+    throw new Error('Required contract addresses are not defined');
+}
+
 export const getSmartAccount = (address: string, signer: ethers.Signer) => {
     return new ethers.Contract(
         address,
@@ -33,7 +37,10 @@ export const getExistingAccount = async (signer: ethers.Signer) => {
     
     try {
         const accountAddress = await factory.getAddress(address, ACCOUNT_SALT);
-        const code = await signer.provider?.getCode(accountAddress);
+        if (!signer.provider) {
+            throw new Error('Provider not available');
+        }
+        const code = await signer.provider.getCode(accountAddress);
         
         if (code && code.length > 2) {
             return accountAddress;
@@ -63,8 +70,15 @@ export const createAccount = async (signer: ethers.Signer) => {
 
 export const getBalance = async (address: string, provider: ethers.providers.Provider) => {
     try {
+        if (!address) {
+            console.error('Address is required for getBalance');
+            return '0';
+        }
+        console.log('Getting balance for address:', address);
         const balance = await provider.getBalance(address);
-        return ethers.utils.formatEther(balance);
+        const formattedBalance = ethers.utils.formatEther(balance);
+        console.log('Balance:', formattedBalance);
+        return formattedBalance;
     } catch (error) {
         console.error('Error getting balance:', error);
         return '0';

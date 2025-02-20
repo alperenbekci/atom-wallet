@@ -68,6 +68,8 @@ export const useWallet = () => {
         isLoading,
         disconnectWallet,
         smartAccountAddress,
-        hasAccount
+        hasAccount,
+        setSmartAccountAddress,
+        setHasAccount
     };
 }; 
