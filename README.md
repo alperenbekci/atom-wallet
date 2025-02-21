@@ -6,6 +6,10 @@ Atom Wallet is a modern and user-friendly ERC4337 smart wallet application with 
 
 ### ❗ For contracts, go to the contracts branch and review the documentation.
 
+## Pitch deck
+
+- [pitch deck](https://drive.google.com/file/d/1u7fSHJU1ooHorpUHZeRFnlFkPA7uZKWC/view?usp=sharing)
+
 ## 🌟 Features
 
 ### 🤖 AI-Powered Features
