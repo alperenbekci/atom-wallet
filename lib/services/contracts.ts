@@ -1,7 +1,16 @@
 import { ACCOUNT_SALT } from "./../config/index";
 import { ethers } from "ethers";
-import { ENTRYPOINT_ADDRESS, ACCOUNT_FACTORY_ADDRESS } from "../config/index";
-import { EntryPointABI, SmartAccountABI, AccountFactoryABI } from "../abi";
+import {
+  ENTRYPOINT_ADDRESS,
+  ACCOUNT_FACTORY_ADDRESS,
+  REGISTRY_ADDRESS,
+} from "../config/index";
+import {
+  EntryPointABI,
+  SmartAccountABI,
+  AccountFactoryABI,
+  RegistryABI,
+} from "../abi";
 
 if (!ENTRYPOINT_ADDRESS || !ACCOUNT_FACTORY_ADDRESS) {
   throw new Error("Required contract addresses are not defined");
@@ -21,6 +30,10 @@ export const getAccountFactory = (signer: ethers.Signer) => {
     AccountFactoryABI,
     signer
   );
+};
+
+export const getSmartAccountRegistry = (signer: ethers.Signer) => {
+  return new ethers.Contract(REGISTRY_ADDRESS, RegistryABI, signer);
 };
 
 export const getExistingAccount = async (signer: ethers.Signer) => {
