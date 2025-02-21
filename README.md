@@ -1,4 +1,4 @@
-# Atom Wallet - ERC4337 Smart Wallet
+# Atom Wallet - First Agentic AI Smart Wallet on Units Network
 
 ![Atom Wallet](assets/images/banner.png)
 
@@ -8,7 +8,7 @@ Atom Wallet is a modern and user-friendly ERC4337 smart wallet application with 
 
 ## Pitch deck
 
-- [pitch deck](https://drive.google.com/file/d/1u7fSHJU1ooHorpUHZeRFnlFkPA7uZKWC/view?usp=sharing)
+- [pitch deck](https://drive.google.com/file/d/109Wrq1hVWN4ZdQRS3Rf2kTqqG7vImzw8/view?usp=sharing)
 
 ## 🌟 Features
 
