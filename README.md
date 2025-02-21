@@ -1,66 +1,80 @@
-## Foundry
+# Smart Account Contracts
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+Bu proje, Account Abstraction (EIP-4337) tabanlı akıllı hesap sistemini içerir.
 
-Foundry consists of:
+## Kontratlar
 
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+- `SmartAccount.sol`: ERC-4337 uyumlu akıllı hesap kontratı
+- `AccountFactory.sol`: Yeni akıllı hesaplar oluşturmak için fabrika kontratı
+- `MinimalPaymaster.sol`: Basit bir paymaster implementasyonu
+- `SmartAccountRegistry.sol`: Kullanıcı adı kayıt sistemi
 
-## Documentation
+## Kurulum
 
-https://book.getfoundry.sh/
-
-## Usage
-
-### Build
-
-```shell
-$ forge build
+1. Foundry'yi yükleyin:
+```bash
+curl -L https://foundry.paradigm.xyz | bash
+foundryup
 ```
 
-### Test
-
-```shell
-$ forge test
+2. Dependencies'leri yükleyin:
+```bash
+forge install
 ```
 
-### Format
-
-```shell
-$ forge fmt
+3. Kontratları derleyin:
+```bash
+forge build
 ```
 
-### Gas Snapshots
+## Test
 
-```shell
-$ forge snapshot
+Testleri çalıştırmak için:
+```bash
+forge test
 ```
 
-### Anvil
-
-```shell
-$ anvil
+Detaylı test çıktısı için:
+```bash
+forge test -vvv
 ```
 
-### Deploy
+## Deploy
 
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
+1. `.env` dosyasını oluşturun:
+```bash
+cp .env.example .env
 ```
 
-### Cast
-
-```shell
-$ cast <subcommand>
+2. `.env` dosyasını düzenleyin:
+```
+PRIVATE_KEY=your_private_key
+RPC_URL=your_rpc_url
 ```
 
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
+3. Kontratları deploy edin:
+```bash
+forge script script/Deploy.s.sol --rpc-url $RPC_URL --broadcast
 ```
+
+## Paymaster Fonlama
+
+MinimalPaymaster'ı fonlamak için:
+```bash
+forge script script/Fund.s.sol --rpc-url $RPC_URL --broadcast
+```
+
+Bu script:
+- MinimalPaymaster'a 0.1 ETH deposit yapar
+- MinimalPaymaster için 0.1 ETH stake ekler (1 günlük unstake süresi ile)
+
+## Kontrat Adresleri (Units Network)
+
+- EntryPoint: `0x5FBe6efF3cCde930542d535297166487c5d9ED5e`
+- AccountFactory: `0x4731b9A288AfBBc5b95AbeC9f7B7f1FD4dE079D1`
+- MinimalPaymaster: `0xe652A2E58c549a0C0589499b028d1af8c1f3A49d`
+- SmartAccountRegistry: `0x5c303c80AAc8AC998501e46951eb55c6DfA7c1E2`
+
+## Lisans
+
+MIT
